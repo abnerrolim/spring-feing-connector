@@ -1,4 +1,4 @@
-# Realwave Feign Commons
+# Spring Feign Connector
 
 This lib provides a standardized way to declare a feign interface to our REST's API, providing the follows features:
 * A standardized way to log and handle errors
