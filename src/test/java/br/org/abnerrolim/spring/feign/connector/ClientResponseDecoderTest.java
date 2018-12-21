@@ -54,12 +54,11 @@ public class ClientResponseDecoderTest {
                 .build();
 
         ParameterizedType parameterizedType = ParameterizedTypeImpl.make(ClientResponse.class, new Type[]{ObjectResponse.class}, null);
-        Object resEntity = decoder.decode(response, parameterizedType);
+        Object resEntity = decoder.decode(response, ObjectResponse.class);
 
-        Assert.assertThat(resEntity.getClass(), equalTo(ClientResponse.class));
-        ClientResponse parsed = (ClientResponse) resEntity;
-        Assert.assertThat(parsed.isError(), is(false));
-        Assert.assertThat(parsed.get().getClass(), equalTo(ObjectResponse.class));
+        Assert.assertThat(resEntity.getClass(), equalTo(ObjectResponse.class));
+        ObjectResponse parsed = (ObjectResponse) resEntity;
+        Assert.assertThat(parsed, is(equalTo(objectResponse)));
     }
 
 
@@ -88,17 +87,15 @@ public class ClientResponseDecoderTest {
                 .request(request)
                 .build();
 
-        ParameterizedType parameterizedType = ParameterizedTypeImpl.make(ClientResponse.class, new Type[]{ObjectResponse.class}, null);
-        ParameterizedType ubberParametrizedType = ParameterizedTypeImpl.make(ResponseEntity.class,new Type[]{parameterizedType}, null);
-        Object decoded = decoder.decode(response, ubberParametrizedType);
+        ParameterizedType parameterizedType = ParameterizedTypeImpl.make(ResponseEntity.class, new Type[]{ObjectResponse.class}, null);
+        Object decoded = decoder.decode(response, parameterizedType);
 
         Assert.assertThat(decoded, notNullValue());
         Assert.assertThat(decoded.getClass(), equalTo(ResponseEntity.class));
         ResponseEntity resEntity = (ResponseEntity) decoded;
-        Assert.assertThat(resEntity.getBody().getClass(), equalTo(ClientResponse.class));
-        ClientResponse parsed = (ClientResponse) resEntity.getBody();
-        Assert.assertThat(parsed.isError(), is(false));
-        Assert.assertThat(parsed.get().getClass(), equalTo(ObjectResponse.class));
+        Assert.assertThat(resEntity.getBody().getClass(), equalTo(ObjectResponse.class));
+        ObjectResponse parsed = (ObjectResponse) resEntity.getBody();
+        Assert.assertThat(parsed, equalTo(objectResponse));
     }
 
     @Test
@@ -157,19 +154,15 @@ public class ClientResponseDecoderTest {
                 .build();
 
         Type[] types = new Type[]{Void.class};
-        ParameterizedType parameterizedType = ParameterizedTypeImpl.make(ClientResponse.class,types, null );
-        ParameterizedType ubberParametrizedType = ParameterizedTypeImpl.make(ResponseEntity.class,new Type[]{parameterizedType}, null);
+        ParameterizedType parameterizedType = ParameterizedTypeImpl.make(ResponseEntity.class,types, null );
 
-        Object decoded = decoder.decode(response, ubberParametrizedType);
+        Object decoded = decoder.decode(response, parameterizedType);
 
 
         Assert.assertThat(decoded, notNullValue());
         Assert.assertThat(decoded.getClass(), equalTo(ResponseEntity.class));
         ResponseEntity resEntity = (ResponseEntity) decoded;
-        Assert.assertThat(resEntity.getBody().getClass(), equalTo(ClientResponse.class));
-        ClientResponse parsed = (ClientResponse) resEntity.getBody();
-        Assert.assertThat(parsed.isError(), is(false));
-        Assert.assertThat(parsed.get(), nullValue());
+        Assert.assertThat(resEntity.getBody(), is(nullValue()));
 
     }
 
@@ -179,6 +172,28 @@ public class ClientResponseDecoderTest {
         public Integer age = 10;
         public Collection<String> collect = Collections.singleton("Ahow");
 
+        @Override
+        public String toString() {
+            return "ObjectResponse{" + "name='" + name + '\'' + ", age=" + age + ", collect=" + collect + '}';
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            ObjectResponse that = (ObjectResponse) o;
+            return Objects.equals(name, that.name) && Objects.equals(age, that.age) && collect.size() == that.collect.size() && collect.containsAll(that.collect);
+        }
+
+        @Override
+        public int hashCode() {
+
+            return Objects.hash(name, age, collect);
+        }
     }
 
 }
