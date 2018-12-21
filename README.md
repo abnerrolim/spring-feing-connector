@@ -244,7 +244,7 @@ If you need a specific ObjectMapper's config to parse your objects you can overr
         return feignConnectorConfigHelper.config(objectMapper)
                 .withSpringContract()
                 .withRequestInterceptor(new MyInterceptorHere(), feignInterceptor)
-                .buildSimpleClient(CreditCardService.class, walletQueryUrl);;
+                .buildSimpleClient(CreditCardService.class, walletQueryUrl);
     }
 ```
 
@@ -362,6 +362,15 @@ Sometimes is necessary resolve your host address of your Feign client at runtime
     AuthorizationResponse authorize(URI var1, AuthorizationRequest var2);
 ```
 But this modified signature blocks the possibility to share the same interface with Spring Boot Controllers. To to that you can build your client using FeignConnectorConfigHelper using a Dynamic Resolver that receives a DynamicHostResolver implementation. This implementation will be responsible to resolve the host string by overriding ```String getHost()``` method. You can retrieve this value from database, properties or whatever you want. This host resolution will be concatenated with path mapped into Feign interface at runtime, so make sure to return a valid value.
+Example;
+```java
+    @Bean //your API client should provide a DynamicHostResolver and spring will inject here
+    public CreditCardService creditCardService(DynamicHostResolver hostResolverImpl,
+                                               FeignConnectorConfigHelper feignConnectorConfigHelper) {
+        return feignConnectorConfigHelper.config()
+                        .buildDynamicHostClient(CreditCardService.class, hostResolverImpl);
+    }
+```
 
 ## Using Your New Client<a name="clientuse"></a>
 If you are ready to use a Feign interface builded with this approach, you only need to inject the interface (CreditCardService in this example). If the lib already defines a default bean injetor for CreditCardService that's it, your bean will be already injected with right configurations, but if not, see previous topics "Configuration of Your Feign Client" and ask to the author about the right configuration aspects.
