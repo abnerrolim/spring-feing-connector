@@ -50,10 +50,9 @@ public class ClientResponseErrorDecoderTest {
         ClientResponseErrorDecoder.ClientResponseException e = errorDecoder.decode("GET", response);
         Assert.assertThat(e, notNullValue());
         Assert.assertThat(e.response, notNullValue());
-        Assert.assertThat(e.response.isError(), is(true));
-        Assert.assertThat(e.response.getError().getCode(), notNullValue());
-        Assert.assertThat(e.response.getError().getFields(), nullValue());
-        Assert.assertThat(e.response.getHttpStatus().get(), equalTo(422));
+        Assert.assertThat(e.response.getCode(), notNullValue());
+        Assert.assertThat(e.response.getFields(), nullValue());
+        Assert.assertThat(e.httpStatusResponse, equalTo(422));
     }
 
     @Test
@@ -84,10 +83,9 @@ public class ClientResponseErrorDecoderTest {
         ClientResponseErrorDecoder.ClientResponseException e = errorDecoder.decode("GET", response);
         Assert.assertThat(e, notNullValue());
         Assert.assertThat(e.response, notNullValue());
-        Assert.assertThat(e.response.isError(), is(true));
-        Assert.assertThat(e.response.getHttpStatus().get(), equalTo(400));
-        Assert.assertThat(e.response.getError().getCode(), nullValue());
-        Assert.assertThat(e.response.getError().getFields(), notNullValue());
+        Assert.assertThat(e.httpStatusResponse, equalTo(400));
+        Assert.assertThat(e.response.getCode(), nullValue());
+        Assert.assertThat(e.response.getFields(), notNullValue());
     }
 
     @Test
@@ -118,10 +116,9 @@ public class ClientResponseErrorDecoderTest {
         ClientResponseErrorDecoder.ClientResponseException e = errorDecoder.decode("GET", response);
         Assert.assertThat(e, notNullValue());
         Assert.assertThat(e.response, notNullValue());
-        Assert.assertThat(e.response.isError(), is(true));
-        Assert.assertThat(e.response.getHttpStatus().get(), equalTo(422));
-        Assert.assertThat(e.response.getError().getCode(), notNullValue());
-        Assert.assertThat(e.response.getError().getFields(), nullValue());
+        Assert.assertThat(e.httpStatusResponse, equalTo(422));
+        Assert.assertThat(e.response.getCode(), notNullValue());
+        Assert.assertThat(e.response.getFields(), nullValue());
     }
 
     @Test
@@ -149,10 +146,9 @@ public class ClientResponseErrorDecoderTest {
         ClientResponseErrorDecoder.ClientResponseException e = errorDecoder.decode("GET", response);
         Assert.assertThat(e, notNullValue());
         Assert.assertThat(e.response, notNullValue());
-        Assert.assertThat(e.response.isError(), is(true));
-        Assert.assertThat(e.response.getHttpStatus().get(), equalTo(500));
-        Assert.assertThat(e.response.getError().getCode(), notNullValue());
-        Assert.assertThat(e.response.getError().getFields(), nullValue());
+        Assert.assertThat(e.httpStatusResponse, equalTo(500));
+        Assert.assertThat(e.response.getCode(), notNullValue());
+        Assert.assertThat(e.response.getFields(), nullValue());
     }
 
     @Test
@@ -183,11 +179,10 @@ public class ClientResponseErrorDecoderTest {
         ClientResponseErrorDecoder.ClientResponseException e = errorDecoder.decode("GET", response);
         Assert.assertThat(e, notNullValue());
         Assert.assertThat(e.response, notNullValue());
-        Assert.assertThat(e.response.isError(), is(true));
-        Assert.assertThat(e.response.getHttpStatus().get(), equalTo(500));
-        Assert.assertThat(e.response.getError().getCode(), notNullValue());
-        Assert.assertThat(e.response.getError().metadata(), notNullValue());
-        Assert.assertThat(e.response.getError().metadata().isEmpty(), is(false));
+        Assert.assertThat(e.httpStatusResponse, equalTo(500));
+        Assert.assertThat(e.response.getCode(), notNullValue());
+        Assert.assertThat(e.response.metadata(), notNullValue());
+        Assert.assertThat(e.response.metadata().isEmpty(), is(false));
     }
 
     @Test
@@ -218,11 +213,10 @@ public class ClientResponseErrorDecoderTest {
         ClientResponseErrorDecoder.ClientResponseException e = errorDecoder.decode("GET", response);
         Assert.assertThat(e, notNullValue());
         Assert.assertThat(e.response, notNullValue());
-        Assert.assertThat(e.response.isError(), is(true));
-        Assert.assertThat(e.response.getHttpStatus().get(), equalTo(500));
-        Assert.assertThat(e.response.getError().getCode(), notNullValue());
-        Assert.assertThat(e.response.getError().getMessage(), notNullValue());
-        Assert.assertThat(e.response.getError().metadata().isEmpty(), is(true));
+        Assert.assertThat(e.httpStatusResponse, equalTo(500));
+        Assert.assertThat(e.response.getCode(), notNullValue());
+        Assert.assertThat(e.response.getMessage(), notNullValue());
+        Assert.assertThat(e.response.metadata().isEmpty(), is(true));
     }
     public static class ObjectErrorResponse {
 

@@ -57,10 +57,10 @@ public class ClientResponseErrorDecoder implements ErrorDecoder {
                 errorResponse = ErrorResponse.builder().build();
             if (isNotCapturedClientMessage(errorResponse))
                 errorResponse = buildUnknownErrorMessage(response, errorResponse.metadata());
-            return ClientResponseException.of(ClientResponse.errorOf(errorResponse, response.status()));
+            return ClientResponseException.of(errorResponse, response.status());
         } catch (Exception e) {
             log.error("{} Module - Exception calling method {}. Exception was:", moduleName, methodKey, e);
-            return ClientResponseException.of(ClientResponse.errorOf(buildUnknownErrorMessage(response, Collections.emptyMap()), response.status()));
+            return ClientResponseException.of(buildUnknownErrorMessage(response, Collections.emptyMap()), response.status());
         }
     }
 
@@ -89,21 +89,19 @@ public class ClientResponseErrorDecoder implements ErrorDecoder {
 
     public static class ClientResponseException extends FeignException {
 
-        public final ClientResponse response;
+        public final ErrorResponse response;
+        public final int httpStatusResponse;
 
 
         ClientResponseException(String message,
-                                ClientResponse response) {
+                                ErrorResponse response, int httpStatusResponse) {
             super(message);
             this.response = response;
+            this.httpStatusResponse = httpStatusResponse;
         }
 
-        static ClientResponseException of(ClientResponse response) {
-            return new ClientResponseException("Connector request fail", response);
-        }
-
-        public <T> ClientResponse<T> error(Class<T> of) {
-            return  ClientResponse.cloneErrorTo(response, of);
+        static ClientResponseException of(ErrorResponse response, int httpStatusResponse) {
+            return new ClientResponseException("Connector request fail", response, httpStatusResponse);
         }
     }
 }

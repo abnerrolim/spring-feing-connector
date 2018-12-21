@@ -5,26 +5,18 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import org.springframework.http.HttpStatus;
 
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ClientResponse<T> {
-    @JsonUnwrapped
-    private T response;
-    @JsonUnwrapped
-    private ErrorResponse error;
-    @JsonIgnore
-    private Integer httpStatus;
-    @JsonIgnore
-    private boolean isError = false;
 
-    private ClientResponse(ErrorResponse error, T response, Integer httpStatus) {
-        this.error = error;
-        this.response = response;
-        this.httpStatus = httpStatus;
-    }
+    private T response;
+    private ErrorResponse error;
+    private Integer httpStatus;
+    private boolean isError = false;
 
     private ClientResponse(ErrorResponse error, T response, Integer httpStatus, boolean isError) {
         this.error = error;
@@ -36,28 +28,19 @@ public class ClientResponse<T> {
     ClientResponse() {
     }
 
-    static <T> ClientResponse<T> successOf(T resp, Integer httpStatus) {
-        return new ClientResponse<>(null, resp, httpStatus);
+    private static <T> ClientResponse<T> successFull(T response){
+        return new ClientResponse<>(null, response, null, false);
+    }
+    private static <T> ClientResponse<T> error(ErrorResponse error, int httpStatus){
+        return new ClientResponse<>(error, null, httpStatus, true);
     }
 
-    public static <T> ClientResponse<T> successOf(T resp) {
-        return successOf(resp, null);
-    }
-
-    public static <T> ClientResponse<T> errorOf(ErrorResponse errorMessageResponse) {
-        return new ClientResponse<>(errorMessageResponse, null, null, true);
-    }
-
-    public static <T> ClientResponse<T> errorOf(ErrorResponse errorMessageResponse, Integer httpStatus) {
-        return new ClientResponse<>(errorMessageResponse, null, httpStatus, true);
-    }
-
-    static <P> ClientResponse<P> cloneErrorTo(ClientResponse origin, Class<P> of) {
-        return new ClientResponse<>(origin.error, null, origin.httpStatus, true);
-    }
-
-    void setHttpStatus(int httpStatus) {
-        this.httpStatus = httpStatus;
+    static <T> ClientResponse<T> of(Supplier<T> feingCall) {
+        try{
+           return successFull(feingCall.get());
+        }catch (ClientResponseErrorDecoder.ClientResponseException e){
+            return error(e.response, e.httpStatusResponse);
+        }
     }
 
     @JsonIgnore
@@ -89,22 +72,24 @@ public class ClientResponse<T> {
 
 
     public ErrorResponse getError() {
+        if(!isError)
+            throw new NoSuchElementException("get error on success");
         return error;
     }
 
     public T get() {
         if (isError())
-            throw new IllegalStateException("Is error response, can't convert to expected value!");
+            throw new NoSuchElementException("get value on error");
         return response;
     }
 
-    public <U> U fold(Function<? super ErrorResponse, ? extends U> leftMapper, Function<? super T, ? extends U> rightMapper) {
-        Objects.requireNonNull(leftMapper, "leftMapper is null");
-        Objects.requireNonNull(rightMapper, "rightMapper is null");
+    public <U> U fold(Function<? super ErrorResponse, ? extends U> errorMapper, Function<? super T, ? extends U> successMapper) {
+        Objects.requireNonNull(errorMapper, "errorMapper is null");
+        Objects.requireNonNull(successMapper, "successMapper is null");
         if (isError()) {
-            return leftMapper.apply(getError());
+            return errorMapper.apply(getError());
         } else {
-            return rightMapper.apply(get());
+            return successMapper.apply(get());
         }
     }
 }
